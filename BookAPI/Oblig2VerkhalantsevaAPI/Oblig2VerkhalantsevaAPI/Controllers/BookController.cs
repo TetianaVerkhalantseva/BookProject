@@ -32,6 +32,11 @@ public class BookController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] BookDto book)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var newBook = new Book
         {
             Title = book.Title,
