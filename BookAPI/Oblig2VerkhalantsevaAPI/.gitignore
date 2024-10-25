@@ -1,5 +1,31 @@
-bin/
-obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Rider-specific
+/.idea/
+.idea
+.idea/
+*.sln.iml
+.idea/workspace.xml
+.idea/vcs.xml
+
+# Build files
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Logs
+*.log
+
+# IDE configuration files
+*.DotSettings.user
+
+
+.DS_Store
+**/.DS_Store
