@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oblig2VerkhalantsevaAPI", "Oblig2VerkhalantsevaAPI\Oblig2VerkhalantsevaAPI.csproj", "{EB0CD7E1-647D-4D9F-8855-397A25875F8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oblig2VerkhalantsevaAPITests", "Oblig2VerkhalantsevaAPITests\Oblig2VerkhalantsevaAPITests.csproj", "{876C36BC-E484-4D26-9A6E-484E2A584602}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{EB0CD7E1-647D-4D9F-8855-397A25875F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB0CD7E1-647D-4D9F-8855-397A25875F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB0CD7E1-647D-4D9F-8855-397A25875F8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{876C36BC-E484-4D26-9A6E-484E2A584602}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{876C36BC-E484-4D26-9A6E-484E2A584602}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{876C36BC-E484-4D26-9A6E-484E2A584602}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{876C36BC-E484-4D26-9A6E-484E2A584602}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
