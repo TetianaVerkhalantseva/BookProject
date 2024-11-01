@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Oblig2VerkhalantsevaAPI.Models.Entities;
 
 namespace Oblig2VerkhalantsevaAPI.Models;
 
@@ -8,6 +9,7 @@ public class Book
     public int Id { get; set; }
     [MaxLength(25)]
     public string Title { get; set; } = "New Title";
+    [MaxLength(300)] 
     public string? Description { get; set; }
     public int Year { get; set; }
     public int AuthorId { get; set; } 
