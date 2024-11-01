@@ -16,71 +16,110 @@ public class BookController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<List<Book>> GetAll() => await _service.GetAll();
+    public async Task<IActionResult> GetBooks()
+    {
+        var result = await _service.GetAllBooks();
+        return Ok(result); // 200: Ok
+    }
 
     [HttpGet("{id:int}")]
-    public IActionResult Get([FromRoute] int id)
+    public async Task<IActionResult> Get([FromRoute] int id)
     {
-        var book = _service.Get(id);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState); // 400: Bad Request: Invalid request format
+        }
 
-        if (book == null)
-            return NotFound($"Not book with this id {id}.");
-        
-        return Ok(book);
+        var c = await _service.GetBook(id);
+        if (c == null)
+        {
+            return NotFound($"No book with Id {id} was found."); // 404: Not Found
+        }
+
+        return Ok(c);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] BookDto book)
+    public async Task<IActionResult> Create([FromBody] BookDtoAdd book)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        
+    
+        var existingBook = await _service.GetBookByTitle(book.Title);
+        if (existingBook != null)
+        {
+            return Conflict("A book with the same title already exists."); // 409: Conflict
+        }
+    
         var newBook = new Book
         {
             Title = book.Title,
             Description = book.Description,
             Year = book.Year,
+            AuthorId = book.AuthorId,
+            CategoryId = book.CategoryId,
+            PublisherId = book.PublisherId,
+            LanguageId = book.LanguageId
         };
 
         await _service.Save(newBook);
-        return CreatedAtAction(nameof(Get), new { id = newBook.Id }, newBook);
-
+        return CreatedAtAction(nameof(Get), new { id = newBook.Id }, newBook); // 201: Created
     }
     
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Book book)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] BookDtoAdd book)
     {
         if (id != book.Id)
-            return BadRequest("Id from Route does not match book id.");
+            return BadRequest("Id from route does not match id from body.");
+    
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
 
-        var existingBook = _service.Get(id);
-
+        var existingBook = await _service.GetBook(id);
         if (existingBook is null)
-            return NotFound($"No book with the id {id}.");
+            return NotFound($"No book with id {id} found.");
 
-        var newBook = new Book
+        var updatedBook = new Book
         {
             Id = book.Id,
             Title = book.Title,
             Description = book.Description,
             Year = book.Year,
+            AuthorId = book.AuthorId,
+            CategoryId = book.CategoryId,
+            PublisherId = book.PublisherId,
+            LanguageId = book.LanguageId
         };
 
-        await _service.Save(newBook);
-        return Ok("Book successfully updated.");
+        await _service.Save(updatedBook);
+        return Ok(new { Message = $"Book with id {id} successfully updated!", Book = updatedBook });
     }
     
     [HttpDelete("{id:int}")]
-    public IActionResult Delete([FromRoute] int id)
+    public async Task<IActionResult> Delete([FromRoute] int id)
     {
-        var book = _service.Get(id);
-        if (book == null)
-            return NotFound($"No book with the id {id}.");
-        
-        _service.Delete(id);
-        return Ok("Book successfully deleted.");
+        var book = await _service.GetBook(id); 
+        if (book is null)
+            return NotFound($"No book with id {id} found.");
+    
+        await _service.Delete(id); 
+    
+        return NoContent(); // 204: No Content
+        //return Ok($"Book with id {id} successfully deleted!");
     }
     
 }
+
+// Summary:
+
+// 200: Ok
+// 201: Created
+// 204: No Content
+
+// 400: Bad Request
+// 404: Not Found
+// 409: Conflict

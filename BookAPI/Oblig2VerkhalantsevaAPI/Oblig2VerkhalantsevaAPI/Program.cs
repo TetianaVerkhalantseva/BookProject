@@ -1,15 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using Oblig2VerkhalantsevaAPI.Data;
 using Oblig2VerkhalantsevaAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("ApplicationContextConnection") ??
+                       throw new InvalidOperationException("Connection string 'ApplicationContextConnection' not found.");
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<IBookService, BookService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllRequests", policyBuilder =>
@@ -19,6 +20,13 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
+// DB Service
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+// Interfaces
+builder.Services.AddTransient<IBookService, BookService>();
 
 
 var app = builder.Build();

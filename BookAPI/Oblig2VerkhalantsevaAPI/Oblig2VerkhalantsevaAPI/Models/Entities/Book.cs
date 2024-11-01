@@ -1,10 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Oblig2VerkhalantsevaAPI.Models;
 
 public class Book
 
 {
     public int Id { get; set; }
-    public string Title { get; set; } = null!; // Title никогда не должен быть null, но пока временно инициализирован как null
+    [MaxLength(25)]
+    public string Title { get; set; } = "New Title";
     public string? Description { get; set; }
     public int Year { get; set; }
     public int AuthorId { get; set; } 

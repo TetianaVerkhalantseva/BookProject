@@ -4,12 +4,14 @@ namespace Oblig2VerkhalantsevaAPI.Services;
 
 public interface IBookService
 {
-    Task<List<Book>> GetAll();
-    
-    Book? Get(int id);
-    
+    Task<IEnumerable<BookDto>> GetAllBooks();
+
+    Task<BookDto?> GetBook(int id);
+
+    Task<BookDto?> GetBookByTitle(string title);
+
     Task Save(Book book);
-    
+
     Task Delete(int id);
-    
+
 }
