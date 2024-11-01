@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Oblig2VerkhalantsevaAPI.Models;
+using Oblig2VerkhalantsevaAPI.Models.Entities;
 
 namespace Oblig2VerkhalantsevaAPI.Data;
 
@@ -11,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
+        Database.Migrate();
     }
 
     public DbSet<Book> Book { get; set; } = null!;
