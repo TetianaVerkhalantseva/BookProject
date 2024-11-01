@@ -26,6 +26,12 @@ obj/
 # IDE configuration files
 *.DotSettings.user
 
-
+# macOS
 .DS_Store
 **/.DS_Store
+
+# User-specific files
+launchSettings.json
+
+# Development-specific app settings
+appsettings.Development.json
