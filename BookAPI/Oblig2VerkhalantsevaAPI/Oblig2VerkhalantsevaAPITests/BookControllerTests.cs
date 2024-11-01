@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Newtonsoft.Json.Linq;
 using Oblig2VerkhalantsevaAPI.Controllers;
@@ -163,7 +165,7 @@ public class BookControllerTests
     {
         // Arrange
         _controller.ModelState.AddModelError("Title", "Title is required");
-        var bookDtoAdd = new BookDtoAdd(); // Невалидно, так как отсутствует поле Title
+        var bookDtoAdd = new BookDtoAdd();
 
         // Act
         var result = await _controller.Create(bookDtoAdd) as BadRequestObjectResult;
@@ -200,6 +202,95 @@ public class BookControllerTests
         Assert.Equal(409, result.StatusCode);
     }
     
+    [Fact]
+    public async Task Create_ReturnsBadRequest_WhenForeignKeyConstraintFails()
+    {
+        // Arrange: setting up a book with invalid foreign keys
+        var bookDto = new BookDtoAdd
+        {
+            Title = "Invalid Foreign Key Book",
+            Description = "Description",
+            Year = 2022,
+            AuthorId = 99, // Non-existent
+            CategoryId = 99, // Non-existent
+            PublisherId = 99, // Non-existent
+            LanguageId = 99 // Non-existent
+        };
+
+        _mock.Setup(service => service.GetBookByTitle(bookDto.Title)).ReturnsAsync((BookDto)null);
+        _mock.Setup(service => service.Save(It.IsAny<Book>()))
+            .ThrowsAsync(new DbUpdateException("Foreign key constraint failed", 
+                new SqliteException("SQLite Error 19: 'FOREIGN KEY constraint failed'.", 19)));
+
+        // Act
+        var result = await _controller.Create(bookDto) as BadRequestObjectResult;
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(400, result.StatusCode);
+        Assert.Equal("Creation failed due to invalid foreign key. Please ensure that Author, Category, Publisher, and Language IDs exist in the database.", result.Value);
+    }
+    
+    [Fact]
+    public async Task Create_ReturnsInternalServerError_WhenUnexpectedExceptionOccurs()
+    {
+        // Arrange: setting up a valid book DTO and simulating an unexpected exception
+        var bookDto = new BookDtoAdd
+        {
+            Title = "Valid Book",
+            Description = "Description",
+            Year = 2022,
+            AuthorId = 1,
+            CategoryId = 1,
+            PublisherId = 1,
+            LanguageId = 1
+        };
+
+        _mock.Setup(service => service.GetBookByTitle(bookDto.Title)).ReturnsAsync((BookDto)null);
+        _mock.Setup(service => service.Save(It.IsAny<Book>()))
+            .ThrowsAsync(new Exception("Unexpected error"));
+
+        // Act
+        var result = await _controller.Create(bookDto) as ObjectResult;
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(500, result.StatusCode);
+        Assert.Equal("An unexpected error occurred. Please try again later.", result.Value);
+    }
+
+
+//UPDATE
+    [Fact]
+    public async Task Update_ReturnsInternalServerError_WhenUnexpectedExceptionOccurs()
+    {
+        // Arrange: setting up a valid book DTO and simulating an unexpected exception
+        var existingBook = GetTestBookDtos().First();
+        var updatedBookDto = new BookDtoAdd
+        {
+            Id = existingBook.Id,
+            Title = "Updated Book",
+            Description = "Updated Description",
+            Year = 2024,
+            AuthorId = 1,
+            CategoryId = 1,
+            PublisherId = 1,
+            LanguageId = 1
+        };
+
+        _mock.Setup(service => service.GetBook(updatedBookDto.Id)).ReturnsAsync(existingBook);
+        _mock.Setup(service => service.Save(It.IsAny<Book>()))
+            .ThrowsAsync(new Exception("Unexpected error"));
+
+        // Act
+        var result = await _controller.Update(updatedBookDto.Id, updatedBookDto) as ObjectResult;
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(500, result.StatusCode);
+        Assert.Equal("An unexpected error occurred. Please try again later.", result.Value);
+    }
+
     
     //UPDATE
     [Fact]
@@ -296,7 +387,36 @@ public class BookControllerTests
         Assert.NotNull(result);
         Assert.Equal(400, result.StatusCode);
     }
+    
+    [Fact]
+    public async Task Update_ReturnsBadRequest_WhenForeignKeyConstraintFails()
+    {
+        // Arrange: setting up a book update with invalid foreign keys
+        var bookDto = new BookDtoAdd
+        {
+            Id = 1,
+            Title = "Invalid Foreign Key Book",
+            Description = "Description",
+            Year = 2022,
+            AuthorId = 99, // Non-existent
+            CategoryId = 99, // Non-existent
+            PublisherId = 99, // Non-existent
+            LanguageId = 99 // Non-existent
+        };
 
+        _mock.Setup(service => service.GetBook(bookDto.Id)).ReturnsAsync(new BookDto { Id = bookDto.Id });
+        _mock.Setup(service => service.Save(It.IsAny<Book>()))
+            .ThrowsAsync(new DbUpdateException("Foreign key constraint failed", 
+                new SqliteException("SQLite Error 19: 'FOREIGN KEY constraint failed'.", 19)));
+
+        // Act
+        var result = await _controller.Update(bookDto.Id, bookDto) as BadRequestObjectResult;
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(400, result.StatusCode);
+        Assert.Equal("Update failed due to invalid foreign key. Please ensure that Author, Category, Publisher, and Language IDs exist in the database.", result.Value);
+    }
     
     
     //DELETE

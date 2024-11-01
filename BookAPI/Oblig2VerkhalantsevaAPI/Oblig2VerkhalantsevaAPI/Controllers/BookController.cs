@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Oblig2VerkhalantsevaAPI.Models;
 using Oblig2VerkhalantsevaAPI.Services;
 
@@ -64,8 +66,20 @@ public class BookController : ControllerBase
             LanguageId = book.LanguageId
         };
 
-        await _service.Save(newBook);
-        return CreatedAtAction(nameof(Get), new { id = newBook.Id }, newBook); // 201: Created
+        try
+        {
+            await _service.Save(newBook);
+            return CreatedAtAction(nameof(Get), new { id = newBook.Id }, newBook); // 201: Created
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+        {
+            return BadRequest("Creation failed due to invalid foreign key. Please ensure that Author, Category, Publisher, and Language IDs exist in the database.");
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            return StatusCode(500, "An unexpected error occurred. Please try again later."); // 500: Internal Server Error
+        }
     }
     
     [HttpPut("{id:int}")]
@@ -95,8 +109,20 @@ public class BookController : ControllerBase
             LanguageId = book.LanguageId
         };
 
-        await _service.Save(updatedBook);
-        return Ok(new { Message = $"Book with id {id} successfully updated!", Book = updatedBook });
+        try
+        {
+            await _service.Save(updatedBook);
+            return Ok(new { Message = $"Book with id {id} successfully updated!", Book = updatedBook });
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+        {
+            return BadRequest("Update failed due to invalid foreign key. Please ensure that Author, Category, Publisher, and Language IDs exist in the database.");
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            return StatusCode(500, "An unexpected error occurred. Please try again later."); // 500: Internal Server Error
+        }
     }
     
     [HttpDelete("{id:int}")]
@@ -123,3 +149,4 @@ public class BookController : ControllerBase
 // 400: Bad Request
 // 404: Not Found
 // 409: Conflict
+// 500: Internal Server Error
