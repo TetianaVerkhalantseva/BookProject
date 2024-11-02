@@ -1,6 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
-  
-    <h1>Authors</h1>
+
+<h1>Authors</h1>
+<button id="addAuthorButton">Add Author</button>
+
+<!-- Form for adding a new author -->
+<div id="addAuthorFormContainer" style="display: none; margin-top: 20px;">
+    <form id="addAuthorForm">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required>
+        
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required>
+        
+        <button type="submit">Save Author</button>
+        <button type="button" id="cancelAddAuthor">Cancel</button>
+    </form>
+</div>
+
+<!-- Container for displaying author cards -->
+<div id="authorDataContainer" class="author-container"></div>
+
+<!-- Overlay -->
+<div class="modal-overlay" id="modalOverlay"></div>
+
+<!-- Edit Author Modal -->
+<div id="editAuthorModal" class="author-edit-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Edit Author</h2>
+        <form id="editAuthorForm">
+            <label for="editFirstName">First Name:</label>
+            <input type="text" id="editFirstName" name="firstName" required>
+            
+            <label for="editLastName">Last Name:</label>
+            <input type="text" id="editLastName" name="lastName" required>
+            
+            <button type="submit" id="saveAuthorButton">Save</button>
+            <button type="button" id="cancelEditAuthor">Cancel</button>
+        </form>
+    </div
 
 {% endblock %}

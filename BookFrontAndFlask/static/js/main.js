@@ -1,6 +1,8 @@
 $(document).ready(function() {
     var base = 'https://localhost:7291';
     var originalBookData = {};
+    var originalAuthorData = {};
+    var editingAuthorId = null;
 
     $('#addBookButton').click(function() {
         window.location.href = '/book/add';
@@ -226,4 +228,186 @@ $(document).ready(function() {
     } else {
         fetchBooks();
     }
+
+    // Author-related functions
+
+    // Show the add author form
+    $('#addAuthorButton').click(function() {
+        $('#addAuthorFormContainer').show();
+        $('#addAuthorButton').hide();
+    });
+
+    // Hide the add author form and reset it
+    $('#cancelAddAuthor').click(function() {
+        $('#addAuthorFormContainer').hide();
+        $('#addAuthorButton').show();
+        $('#addAuthorForm')[0].reset();
+    });
+
+    // Submit the add author form
+    $('#addAuthorForm').on('submit', function(event) {
+        event.preventDefault();
+
+        var newAuthor = {
+            firstName: $('#firstName').val(),
+            lastName: $('#lastName').val()
+        };
+
+        $.ajax({
+            url: `${base}/api/Author`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(newAuthor),
+            success: function() {
+                alert('Author added successfully!');
+                $('#addAuthorFormContainer').hide();
+                $('#addAuthorButton').show();
+                $('#addAuthorForm')[0].reset();
+                fetchAuthors(); // Refresh the authors list
+            },
+            error: function(xhr) {
+                let errorMessage = 'An unexpected error occurred.';
+                if (xhr.status === 409) {
+                    errorMessage = 'An author with the same name already exists.';
+                } else if (xhr.status === 400) {
+                    errorMessage = xhr.responseText || 'Invalid input. Please check your data.';
+                } else if (xhr.status === 500) {
+                    errorMessage = 'An unexpected error occurred. Please try again later.';
+                }
+                alert(errorMessage);
+                console.error('Error adding author:', xhr.responseText || error);
+            }
+        });
+    });
+
+    // Open the edit modal with overlay
+    function openEditModal(author) {
+        $('#modalOverlay').show();
+        $('#editAuthorModal').show();
+        $('#editFirstName').val(author.firstName);
+        $('#editLastName').val(author.lastName);
+        editingAuthorId = author.id;
+    }
+
+    // Close the edit modal and hide overlay
+    function closeEditModal() {
+        $('#modalOverlay').hide();
+        $('#editAuthorModal').hide();
+        $('#editAuthorForm')[0].reset();
+        editingAuthorId = null;
+    }
+
+    // Fetch authors and populate the container
+    function fetchAuthors() {
+        $.ajax({
+            url: `${base}/api/Author`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                $('#authorDataContainer').empty();
+                data.forEach(function(author) {
+                    var authorCard = `
+                        <div class="author-card" data-id="${author.id}">
+                            <h2>${author.firstName} ${author.lastName}</h2>
+                            <button class="edit-author-btn" data-id="${author.id}">Edit</button>
+                            <button class="delete-author-btn" data-id="${author.id}">Delete</button>
+                        </div>
+                    `;
+                    $('#authorDataContainer').append(authorCard);
+                });
+
+                $('.edit-author-btn').click(function(event) {
+                    event.stopPropagation();
+                    var authorId = $(this).data('id');
+                    fetchAuthorDetails(authorId); // Fetch and open modal for editing
+                });
+
+                $('.delete-author-btn').click(function(event) {
+                    event.stopPropagation();
+                    var authorId = $(this).data('id');
+                    deleteAuthor(authorId);
+                });
+            },
+            error: function(xhr) {
+                let errorMessage = xhr.responseText || 'Error fetching authors.';
+                console.error('Error fetching authors:', errorMessage);
+            }
+        });
+    }
+
+    // Fetch a single author's details and open edit modal
+    function fetchAuthorDetails(authorId) {
+        $.ajax({
+            url: `${base}/api/Author/${authorId}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(author) {
+                openEditModal(author);
+            },
+            error: function(xhr) {
+                let errorMessage = xhr.responseText || 'Error fetching author details.';
+                console.error('Error fetching author details:', errorMessage);
+            }
+        });
+    }
+
+    // Submit edit author form
+    $('#editAuthorForm').on('submit', function(event) {
+        event.preventDefault();
+
+        var updatedAuthor = {
+            id: editingAuthorId,
+            firstName: $('#editFirstName').val(),
+            lastName: $('#editLastName').val()
+        };
+
+        $.ajax({
+            url: `${base}/api/Author/${editingAuthorId}`,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(updatedAuthor),
+            success: function() {
+                alert('Author updated successfully!');
+                closeEditModal();
+                fetchAuthors(); // Refresh the authors list
+            },
+            error: function(xhr) {
+                let errorMessage = xhr.responseText || 'Error updating author.';
+                alert(errorMessage);
+                console.error('Error updating author:', errorMessage);
+            }
+        });
+    });
+
+    // Close modal on cancel or close button
+    $('#cancelEditAuthor, .close').click(function() {
+        closeEditModal();
+    });
+
+    // Delete an author
+    function deleteAuthor(authorId) {
+        if (!confirm('Are you sure you want to delete this author?')) {
+            return;
+        }
+
+        $.ajax({
+            url: `${base}/api/Author/${authorId}`,
+            type: 'DELETE',
+            success: function() {
+                alert('Author successfully deleted!');
+                fetchAuthors(); // Refresh the authors list
+            },
+            error: function(xhr) {
+                let errorMessage = xhr.responseText || 'Error deleting the author.';
+                alert(errorMessage);
+                console.error('Error deleting author:', errorMessage);
+            }
+        });
+    }
+
+    // Call fetchAuthors on page load
+    if ($('#authorDataContainer').length) {
+        fetchAuthors();
+    }
+
 });

@@ -280,3 +280,128 @@ button.delete:hover {
     background-color: #f44336;
     color: white;
 }
+
+.author-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+}
+
+.author-card {
+    width: 300px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.author-card h2 {
+    font-size: 1.4em;
+    color: rgb(0, 51, 102);
+    margin: 0 0 10px;
+}
+
+.author-card button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.delete-author-btn {
+    background-color: rgb(211, 47, 47); 
+    color: white;
+}
+
+.delete-author-btn:hover {
+    background-color: rgb(180, 40, 40); 
+}
+
+
+/* Overlay for modal background */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000; /* Ensures it appears above other elements */
+    display: none; /* Hidden by default */
+}
+
+/* Modal styling for editing author */
+.author-edit-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; /* Wider modal */
+    padding: 30px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001; /* Above the overlay */
+    text-align: center;
+}
+
+/* Header styling in the modal */
+.author-edit-modal h2 {
+    font-size: 1.8em;
+    color: rgb(0, 51, 102);
+    margin-bottom: 20px;
+}
+
+/* Label and input styling */
+.author-edit-modal label {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.author-edit-modal input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+/* Button styles for save and cancel */
+.author-edit-modal button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#saveAuthorButton {
+    background-color: rgb(0, 150, 136);
+    color: white;
+}
+
+#cancelEditAuthor {
+    background-color: #f44336;
+    color: white;
+}
+
+#saveAuthorButton:hover {
+    background-color: rgb(0, 135, 122);
+}
+
+#cancelEditAuthor:hover {
+    background-color: rgb(220, 50, 50);
+}
