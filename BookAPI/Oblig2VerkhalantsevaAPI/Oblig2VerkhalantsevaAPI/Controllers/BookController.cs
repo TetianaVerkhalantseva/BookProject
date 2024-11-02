@@ -83,15 +83,13 @@ public class BookController : ControllerBase
     }
     
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] BookDtoAdd book)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] BookDtoAdd bookDto)
     {
-        if (id != book.Id)
+        if (id != bookDto.Id)
             return BadRequest("Id from route does not match id from body.");
-    
+
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var existingBook = await _service.GetBook(id);
         if (existingBook is null)
@@ -99,20 +97,20 @@ public class BookController : ControllerBase
 
         var updatedBook = new Book
         {
-            Id = book.Id,
-            Title = book.Title,
-            Description = book.Description,
-            Year = book.Year,
-            AuthorId = book.AuthorId,
-            CategoryId = book.CategoryId,
-            PublisherId = book.PublisherId,
-            LanguageId = book.LanguageId
+            Id = bookDto.Id,
+            Title = bookDto.Title,
+            Description = bookDto.Description,
+            Year = bookDto.Year,
+            AuthorId = bookDto.AuthorId,
+            CategoryId = bookDto.CategoryId,
+            PublisherId = bookDto.PublisherId,
+            LanguageId = bookDto.LanguageId
         };
 
         try
         {
             await _service.Save(updatedBook);
-            return Ok(new { Message = $"Book with id {id} successfully updated!", Book = updatedBook });
+            return Ok(new { Message = $"Book with id {id} successfully updated!" });
         }
         catch (DbUpdateException ex) when (ex.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
         {
@@ -120,8 +118,7 @@ public class BookController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log the exception
-            return StatusCode(500, "An unexpected error occurred. Please try again later."); // 500: Internal Server Error
+            return StatusCode(500, "An unexpected error occurred. Please try again later.");
         }
     }
     
